@@ -1,0 +1,29 @@
+executor: KubernetesExecutor # Vai ser usado o Executor do Kubernets
+defaultAirflowRepository: AirflowKubernets # Nome da imagem que será usada
+defaultAirflowTag: latest
+
+dags:
+  persistence:
+    enabled: true
+    existingClaim: airflow-dags-claim # PVC que está vinculado ao PV.
+
+workers.replicas: 0 # Desabilita todos os workers.
+redis.enabled: false # Desativa a mensageria do redis
+
+securityContext: # Grupo e usuário que será executado no container.
+  # Usuário root, com todas as permissões.
+  fsGroup: 0 
+  runAsGroup: 0
+  runAsUser: 0
+
+logs:
+  persistence:
+    enabled: true
+    existingClaim: airflow-logs-claim
+
+
+config: # 
+  webserver:
+    expose_config: 'True' # Ter acesso aos parâmetros dentro da interface do Airflow
+  core:
+    parallelism: 16

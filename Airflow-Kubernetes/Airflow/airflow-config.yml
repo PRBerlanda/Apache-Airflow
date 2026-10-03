@@ -1,0 +1,105 @@
+# 1º Objeto: Realizando a criação de um namespace para criação do Airflow
+# Grupo de Recursos isolados para fazer algo específio no cluster Kubernets
+apiVersion: v1
+kind: Namespace # Tipo do objeto
+metadata:
+  name: airflow # Nome do objeto
+  labels:
+    name: airflow
+
+---
+# 2º Objeto: Onde estarão armazenadas as DAGs.
+apiVersion: v1
+kind: PersistentVolume # Dados persistentes
+metadata:
+  name: airflow-dags-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi # Guarda até 1Gb de dados
+  accessModes:
+    - ReadWriteOnce # Permite que somente um node utilize esse volume
+  hostPath:
+    path: "/data/dags" # Onde armazena no minikube
+
+---
+# 3º Objeto: # Responsável por pegar determinada parte do armazenamento disponível em um
+# PersistentVolume e disponibilizar esse espaço de armazenamento para um pod específico.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-dags-claim
+  namespace: airflow # Onde está sendo criado o Volume.
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 4º Objeto: Identico ao 2º Objeto. Mas guarda os logs gerados pelas execuções do Airflow.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-logs-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/logs"
+
+---
+# 5º Objeto:
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-logs-claim
+  namespace: airflow
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 6º Objeto: Local para armazenamento dos dados extraídos após execução dos pods.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-data-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/data"
+
+---
+# 7º Objeto:
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-data-claim
+  namespace: airflow
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
