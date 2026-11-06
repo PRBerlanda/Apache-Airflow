@@ -1,0 +1,14 @@
+# Python 3.13 or 3.14 + Java 17/21 (for Spark). Install Airflow with its constraints file (see README).
+apache-airflow==3.3.1
+apache-airflow-providers-apache-spark==6.3.2
+apache-airflow-providers-http==6.0.5
+pyspark==4.2.0
+pandas==3.0.5
+requests==2.34.2
+
+# notebooks
+matplotlib>=3.9
+ipykernel>=6
+
+# tests
+pytest>=8
