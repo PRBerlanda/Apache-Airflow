@@ -1,0 +1,53 @@
+# Values for the official Apache Airflow Helm chart (https://airflow.apache.org/docs/helm-chart/)
+# helm upgrade --install airflow apache-airflow/airflow -n airflow -f override-values.yml
+
+executor: KubernetesExecutor # every task runs in its own pod
+
+# Local image built inside minikube with: docker build -t airflow-yfinance:latest .
+defaultAirflowRepository: airflow-yfinance
+defaultAirflowTag: latest
+airflowVersion: "3.2.2" # must match the FROM line of the Dockerfile
+images:
+  airflow:
+    pullPolicy: IfNotPresent # use the image built locally, do not pull from Docker Hub
+
+# KubernetesExecutor does not use Celery workers or Redis
+workers:
+  replicas: 0
+redis:
+  enabled: false
+
+dags:
+  persistence:
+    enabled: true
+    existingClaim: airflow-dags-claim # PVC bound to the dags PV
+
+logs:
+  persistence:
+    enabled: true
+    existingClaim: airflow-logs-claim
+
+# Run as root so the pods can write to the hostPath volumes mounted by minikube.
+# Fine for a local lab, never for production.
+securityContext:
+  fsGroup: 0
+  runAsGroup: 0
+  runAsUser: 0
+
+# Data volume: where the DAGs save their CSV files (AIRFLOW_DATA_DIR)
+volumes:
+  - name: airflow-data
+    persistentVolumeClaim:
+      claimName: airflow-data-claim
+volumeMounts:
+  - name: airflow-data
+    mountPath: /opt/airflow/data
+env:
+  - name: AIRFLOW_DATA_DIR
+    value: /opt/airflow/data
+
+config:
+  api:
+    expose_config: "True" # show the configuration in the Airflow UI
+  core:
+    parallelism: 16

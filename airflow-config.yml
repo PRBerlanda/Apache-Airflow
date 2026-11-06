@@ -1,0 +1,109 @@
+# Kubernetes objects needed before installing the Airflow Helm chart.
+# Apply with: minikube kubectl -- apply -f airflow-config.yml
+
+# 1) Namespace: an isolated group of resources for Airflow inside the cluster
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: airflow
+  labels:
+    name: airflow
+
+---
+# 2) PersistentVolume for the DAG files (minikube path /data/dags)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-dags-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce # mounted read-write by a single node (minikube has one)
+  hostPath:
+    path: "/data/dags"
+
+---
+# 3) PersistentVolumeClaim: takes part of a PersistentVolume and hands it to the pods
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-dags-claim
+  namespace: airflow
+spec:
+  storageClassName: manual
+  volumeName: airflow-dags-volume # bind explicitly to the PV above
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 4) PersistentVolume for the task logs (minikube path /data/logs)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-logs-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/logs"
+
+---
+# 5) Claim for the logs volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-logs-claim
+  namespace: airflow
+spec:
+  storageClassName: manual
+  volumeName: airflow-logs-volume
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 6) PersistentVolume for the data extracted by the tasks (minikube path /data/data)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-data-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/data"
+
+---
+# 7) Claim for the data volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-data-claim
+  namespace: airflow
+spec:
+  storageClassName: manual
+  volumeName: airflow-data-volume
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
