@@ -1,0 +1,8 @@
+# Python 3.13 or 3.14. Recommended: install Airflow with its constraints file (see README).
+apache-airflow[celery,postgres,redis]==3.3.2
+yfinance==1.7.0
+pandas==3.0.6
+requests==2.34.2
+
+# tests
+pytest>=8
